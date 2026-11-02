@@ -1,0 +1,12 @@
+## Interface: 16001
+## Title: |cffffd100ProfPaden|r - Clam Keeper
+## Notes: Opens clams and makes room using only the lowest-value eligible gray junk stack.
+## Author: Paden
+## Version: 0.1.1-beta
+## Dependencies: ProfPaden
+## SavedVariablesPerCharacter: ProfPadenClamsDB
+## IconTexture: Interface\Icons\INV_Misc_Shell_02
+Policy.lua
+QuickLoot.lua
+Core.lua
+UI.lua
