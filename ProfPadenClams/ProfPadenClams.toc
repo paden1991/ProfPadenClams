@@ -2,7 +2,7 @@
 ## Title: |cffffd100ProfPaden|r - Clam Keeper
 ## Notes: Opens clams and makes room using only the lowest-value eligible gray junk stack.
 ## Author: Paden
-## Version: 0.1.1-beta
+## Version: 0.1.3-beta
 ## Dependencies: ProfPaden
 ## SavedVariablesPerCharacter: ProfPadenClamsDB
 ## IconTexture: Interface\Icons\INV_Misc_Shell_02

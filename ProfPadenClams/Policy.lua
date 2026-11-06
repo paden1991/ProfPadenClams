@@ -2,6 +2,7 @@ local _,C=...
 _G.ProfPadenClams=C
 C.clams={[5523]="Small Barnacled Clam",[5524]="Thick-shelled Clam",[7973]="Big-mouth Clam",[15874]="Soft-shelled Clam"}
 C.failed={}
+C.requestedItemData={}
 function C:Container(name,...)
     local f=C_Container and C_Container[name] or _G[name]
     if f then return f(...) end
@@ -18,6 +19,26 @@ function C:Key(bag,slot,item)
 end
 function C:Same(a,b)
     return a and b and a.itemID==b.itemID and a.stackCount==b.stackCount and a.hyperlink==b.hyperlink
+end
+function C:ClamName(item)
+    if not item or not item.itemID then return end
+    -- Retain the known IDs for other locales and incomplete item-cache data.
+    if self.clams[item.itemID] then return self.clams[item.itemID] end
+    -- A name alone must never use clam meat, food, equipment or crafting reagents.
+    if not item.hasLoot then return end
+    local name=item.itemName
+    if type(name)~="string" or name=="" then
+        local info=C_Item and C_Item.GetItemInfo or GetItemInfo
+        name=info and info(item.hyperlink or item.itemID)
+    end
+    if type(name)=="string" and name~="" then
+        if name:lower():find("clam",1,true) then return name end
+        return
+    end
+    if C_Item and C_Item.RequestLoadItemDataByID and not self.requestedItemData[item.itemID] then
+        self.requestedItemData[item.itemID]=true
+        C_Item.RequestLoadItemDataByID(item.itemID)
+    end
 end
 function C:EachBag(fn)
     -- Carried bags only: never bank, mail, keyring or equipped inventory slots.
@@ -94,7 +115,7 @@ function C:FindClam(includeFailed)
     local first,total
     total=0
     self:EachBag(function(bag,slot,item)
-        if item and self.clams[item.itemID] and not self.db.keep[item.itemID] then
+        if item and self:ClamName(item) and not self.db.keep[item.itemID] then
             total=total+(item.stackCount or 1)
             if not first and not item.isLocked and (includeFailed or not self.failed[self:Key(bag,slot,item)]) then first={bag=bag,slot=slot,item=item} end
         end

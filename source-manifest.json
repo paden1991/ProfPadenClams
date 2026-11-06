@@ -1,24 +1,24 @@
 {
   "addon": "ProfPadenClams",
-  "version": "0.1.1-beta",
+  "version": "0.1.3-beta",
   "interface": 16001,
   "files": [
     {
       "path": "Core.lua",
-      "bytes": 11588,
-      "sha256": "79572b88104b975005cf3e83361ff59fc0a396d15418a252e3bd22e1c30f921b",
+      "bytes": 14253,
+      "sha256": "60ce7574d7aac4bc5c43dd5ba79f09195eb0be21e8e4466e8d40ad44f950b521",
       "external": false
     },
     {
       "path": "Policy.lua",
-      "bytes": 5114,
-      "sha256": "92d5e5988fe8f116b3b9a9594bb06949ee47694bc7f497cdce97b24f050f594e",
+      "bytes": 6032,
+      "sha256": "2b4dc80373670fb0feb4547343464dfd7b8134c36600d8752118bcad3fcf1f80",
       "external": false
     },
     {
       "path": "ProfPadenClams.toc",
       "bytes": 375,
-      "sha256": "3e50b803e32086c0c91018287b7aeada875f3dff8a48c2c5d34b14b0c9c43a80",
+      "sha256": "d5603b7d1ee0e2a5715972d5e742fd2da450b50383a71d69232d4454f9f518b4",
       "external": false
     },
     {
@@ -29,8 +29,8 @@
     },
     {
       "path": "UI.lua",
-      "bytes": 6850,
-      "sha256": "96de838fce393a5defa00d9e7a44288751829ca1949366b13cc612673920a412",
+      "bytes": 7342,
+      "sha256": "5de0becc2db8bb54a6c077d3d3de6cac1e7538b092554ff480a066d11ed130b4",
       "external": false
     }
   ]

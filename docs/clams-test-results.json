@@ -1,0 +1,271 @@
+{
+  "tests": 66,
+  "passed": 66,
+  "results": [
+    {
+      "name": "Known clam IDs remain language-independent and clam meat is not opened",
+      "passed": true
+    },
+    {
+      "name": "Lowest total stack vendor cost wins, not cheapest unit",
+      "passed": true
+    },
+    {
+      "name": "Reagents from all profession catalogs and gathered material indexes protected",
+      "passed": true
+    },
+    {
+      "name": "Newly captured recipe reagents protected without reloading",
+      "passed": true
+    },
+    {
+      "name": "All nonjunk classes and all higher rarities protected",
+      "passed": true
+    },
+    {
+      "name": "Gray gear, readable items, loot containers, spells, specialty items and crafting flags stay",
+      "passed": true
+    },
+    {
+      "name": "Quest items, quest starters and personal keep list stay",
+      "passed": true
+    },
+    {
+      "name": "Uncached, unknown price and incomplete API data stay",
+      "passed": true
+    },
+    {
+      "name": "No deletion without ProfPaden recipe protection",
+      "passed": true
+    },
+    {
+      "name": "Locked slots excluded and specialty bag space not counted",
+      "passed": true
+    },
+    {
+      "name": "Sequential automatic opening and looting without deleting when room exists",
+      "passed": true
+    },
+    {
+      "name": "Full clam loot deletes only cheapest eligible whole stack and then resumes",
+      "passed": true
+    },
+    {
+      "name": "Full bags with useful items only stop without destruction",
+      "passed": true
+    },
+    {
+      "name": "Full bags alone and unrelated inventory errors never trigger cleanup",
+      "passed": true
+    },
+    {
+      "name": "Combat, death, casting, channeling, cursor, merchant, mail and bank prevent opening",
+      "passed": true
+    },
+    {
+      "name": "Unrelated corpse/chest loot is never auto-looted",
+      "passed": true
+    },
+    {
+      "name": "Auto-open block falls back once without repeated calls or deletions",
+      "passed": true
+    },
+    {
+      "name": "Deletion block restores the exact cursor item and does not retry automatically",
+      "passed": true
+    },
+    {
+      "name": "Revalidated slot identity prevents deleting an item moved since selection",
+      "passed": true
+    },
+    {
+      "name": "Wrong cursor identity is never destroyed",
+      "passed": true
+    },
+    {
+      "name": "Cleanup off preserves junk when clam loot is full",
+      "passed": true
+    },
+    {
+      "name": "Unresponsive opening times out once and leaves all inventory intact",
+      "passed": true
+    },
+    {
+      "name": "Pause cancels timers and personal keep works for clams too",
+      "passed": true
+    },
+    {
+      "name": "Manual UI callbacks apply settings and secure bag-slot action",
+      "passed": true
+    },
+    {
+      "name": "Idle bag event bursts coalesce and have no permanent ticking loop",
+      "passed": true
+    },
+    {
+      "name": "Maximum two discarded stacks per clam, including partial loot retries",
+      "passed": true
+    },
+    {
+      "name": "Synchronous bag-full refusal opens again only after confirmed space",
+      "passed": true
+    },
+    {
+      "name": "Failure to pick up a stack cannot trigger destruction",
+      "passed": true
+    },
+    {
+      "name": "Visible preexisting loot blocks opening even if its event was missed",
+      "passed": true
+    },
+    {
+      "name": "Explicit mismatched loot sources override synchronous attribution",
+      "passed": true
+    },
+    {
+      "name": "Real profession data protects ore, cloth, meat, pearls, herbs and components",
+      "passed": true
+    },
+    {
+      "name": "Silent fast pass, either listener order: true",
+      "passed": true
+    },
+    {
+      "name": "Silent fast pass, either listener order: false",
+      "passed": true
+    },
+    {
+      "name": "Unrelated loot forwards native arguments and remains visible",
+      "passed": true
+    },
+    {
+      "name": "Foreign source without item GUID cannot be claimed synchronously",
+      "passed": true
+    },
+    {
+      "name": "Mixed sources and missing asynchronous source data remain manual",
+      "passed": true
+    },
+    {
+      "name": "Synchronous missing sources are attributable to our bag-use call",
+      "passed": true
+    },
+    {
+      "name": "Asynchronous missing source data is not auto looted or hidden",
+      "passed": true
+    },
+    {
+      "name": "Full bags restore native manual loot and retain cleanup policy",
+      "passed": true
+    },
+    {
+      "name": "Silent no-progress fallback reveals remaining loot after one second",
+      "passed": true
+    },
+    {
+      "name": "Loot API failure restores the window and stops retries",
+      "passed": true
+    },
+    {
+      "name": "Bind confirmation reveals loot without confirming or retrying",
+      "passed": true
+    },
+    {
+      "name": "Combat interruption reveals loot and cancels queued fast pass",
+      "passed": true
+    },
+    {
+      "name": "Disable during pending fast pass reveals loot and cancels action",
+      "passed": true
+    },
+    {
+      "name": "Toggle off restores window and retains normal scheduled clam looting",
+      "passed": true
+    },
+    {
+      "name": "Quick loot setting persists and UI plus slash controls work",
+      "passed": true
+    },
+    {
+      "name": "Old fallback timer cannot reveal the next clam session early",
+      "passed": true
+    },
+    {
+      "name": "Wrapper installs once and preserves other event handling",
+      "passed": true
+    },
+    {
+      "name": "Previously unlisted clam container opens and quick-loots end to end",
+      "passed": true
+    },
+    {
+      "name": "All known clam types open and drain their stacks",
+      "passed": true
+    },
+    {
+      "name": "Native container itemName supports mixed-case names without cached GetItemInfo",
+      "passed": true
+    },
+    {
+      "name": "Clam meat, cooked clams, clam-named gear and ordinary loot containers stay untouched",
+      "passed": true
+    },
+    {
+      "name": "Uncached unlisted container requests data once and resumes after data arrives",
+      "passed": true
+    },
+    {
+      "name": "Named clam container honors keep, locked-slot and combat checks",
+      "passed": true
+    },
+    {
+      "name": "Begin revalidates name and container status before using an unlisted item",
+      "passed": true
+    },
+    {
+      "name": "Retry recovers from a transient no-response timeout",
+      "passed": true
+    },
+    {
+      "name": "Explicit retry of a still-blocked action makes only one new attempt",
+      "passed": true
+    },
+    {
+      "name": "Secure manual button accepts name-detected containers with the same bag-slot action",
+      "passed": true
+    },
+    {
+      "name": "Closed loot window with leftover item count does not disable Open clam",
+      "passed": true
+    },
+    {
+      "name": "Busy state cannot strand a pending open beyond its timeout",
+      "passed": true
+    },
+    {
+      "name": "Transient busy state resumes automatically without a new bag event",
+      "passed": true
+    },
+    {
+      "name": "Manual PreClick keeps its native secure button enabled during dispatch",
+      "passed": true
+    },
+    {
+      "name": "Hidden active foreign loot remains blocked by its session event",
+      "passed": true
+    },
+    {
+      "name": "Locked clam count explains disabled button and unlock recovers",
+      "passed": true
+    },
+    {
+      "name": "Status command prints exact wait reason and pending age",
+      "passed": true
+    },
+    {
+      "name": "Opening error survives as a diagnostic without treating unrelated errors as ownership",
+      "passed": true
+    }
+  ],
+  "inGameVerified": false
+}

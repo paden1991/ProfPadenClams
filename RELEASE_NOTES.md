@@ -1,10 +1,11 @@
-Installable **WoW Forever / Interface 16001** package for ProfPadenClams 0.1.1-beta.
+Clam Keeper 0.1.3-beta fixes cases where clams were detected but opening stalled or the Open clam button stayed disabled.
 
-In WowUp, select your Forever installation and use **Install from URL** with `https://github.com/paden1991/ProfPadenClams`. Use the repository URL without `.git`.
+- Recognizes loot containers with "clam" anywhere in their name, including previously unlisted clam types. Clam meat, food, equipment and protected items are excluded.
+- Stops treating leftover loot-slot counts as an active loot window. Actual visible or event-tracked loot still pauses opening.
+- Recovers from temporary busy/locked states and keeps opening timeouts running while busy.
+- Prevents the manual Open clam button from disabling itself before its secure click handler runs.
+- Shows the reason for a pause and adds `/ppclams status` diagnostics.
 
-The attached `-forever.zip` contains the correctly named addon folder and all declared runtime files. `release.json` identifies the Forever flavor. GitHub's automatic source-code archives are development source, not the installable asset.
+Existing junk protections and silent quick loot are preserved. Reload after updating. This remains a beta: 66 automated Lua checks and UIForever panel checks passed; actual item opening in the live game remains unconfirmed.
 
-This is the existing reviewed beta / release-candidate runtime, packaged for WowUp without gameplay changes. It remains a prerelease; live-game acceptance is not certified by packaging checks.
-
-Requires ProfPaden installed separately. This package does not include ProfPaden or Routes.
-
+Requires [ProfPaden](https://github.com/paden1991/ProfPaden) separately. Download the attached `-forever.zip` for WoW Forever / Interface 16001. For WowUp, use `https://github.com/paden1991/ProfPadenClams` with Install from URL and the Beta channel. Automatic Source code archives are not the installable package.

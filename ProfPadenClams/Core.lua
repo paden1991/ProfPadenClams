@@ -1,19 +1,36 @@
 local addon,C=...
+C.version="0.1.3-beta"
 local function now() return GetTime() end
 function C:Print(text) print("|cffffd100Clam Keeper:|r "..text) end
 function C:Status(text,attention)
     self.status=text
     if self.RefreshUI then self:RefreshUI(attention) end
 end
-function C:Busy(allowOwnLoot)
-    if InCombatLockdown() or (UnitIsDeadOrGhost and UnitIsDeadOrGhost("player")) then return true end
-    if (GetCursorInfo and GetCursorInfo()) or (UnitCastingInfo and UnitCastingInfo("player")) or (UnitChannelInfo and UnitChannelInfo("player")) then return true end
-    if next(self.interactions) then return true end
+function C:BusyReason(allowOwnLoot)
+    if InCombatLockdown() then return "Leave combat first." end
+    if UnitIsDeadOrGhost and UnitIsDeadOrGhost("player") then return "You are dead or a ghost." end
+    if GetCursorInfo and GetCursorInfo() then return "Clear the item or spell from your cursor." end
+    if UnitCastingInfo and UnitCastingInfo("player") then return "Finish casting first." end
+    if UnitChannelInfo and UnitChannelInfo("player") then return "Finish channeling first." end
+    local interaction=next(self.interactions)
+    if interaction then return "Close the "..interaction.." window first." end
     for _,name in ipairs({"MerchantFrame","BankFrame","MailFrame","TradeFrame","AuctionFrame","AuctionHouseFrame"}) do
-        local f=_G[name];if f and f:IsShown() then return true end
+        local f=_G[name];if f and f:IsShown() then return "Close "..name.." first." end
     end
-    local lootVisible=self.lootOpen or (LootFrame and LootFrame:IsShown()) or (GetNumLootItems and GetNumLootItems()>0)
-    return lootVisible and not (allowOwnLoot and self.pending and self.pending.ownsLoot)
+    -- Loot slot data alone does not establish an active loot session. It may
+    -- still describe the previous corpse/container after LOOT_CLOSED.
+    local lootVisible=self.lootOpen or (LootFrame and LootFrame:IsShown())
+    if lootVisible and not (allowOwnLoot and self.pending and self.pending.ownsLoot) then return "Close the loot window first." end
+end
+function C:Busy(allowOwnLoot)
+    return self:BusyReason(allowOwnLoot)~=nil
+end
+function C:Diagnostics()
+    local clam,total=self:FindClam(true)
+    self:Print((self.version or "unknown").." | auto="..(self.db.enabled and "on" or "off").." | clams="..total.." | unlocked="..(clam and "yes" or "no"))
+    self:Print("Wait: "..(self:BusyReason(false) or "none").." | pending="..(self.pending and string.format("%.1fs",now()-self.pending.started) or "none").." | manual="..tostring(self.manualOpen==true))
+    self:Print("Status: "..(self.status or "Ready"))
+    if self.lastOpenError then self:Print("Last error during opening: "..self.lastOpenError) end
 end
 function C:Schedule(delay)
     if self.scheduled or not self.db or not C_Timer then return end
@@ -29,13 +46,14 @@ function C:Begin(clam)
     self:InstallQuickLoot()
     if self:Busy(false) then return false end
     local current=self:Item(clam.bag,clam.slot)
-    if not self:Same(clam.item,current) or current.isLocked or not self.clams[current.itemID] or self.db.keep[current.itemID] then return false end
+    local name=self:ClamName(current)
+    if not self:Same(clam.item,current) or current.isLocked or not name or self.db.keep[current.itemID] then return false end
     local snapshot={};for k,v in pairs(current) do snapshot[k]=v end
-    clam.item=snapshot;clam.started=now();clam.removed=0;self.pending=clam
+    clam.item=snapshot;clam.started=now();clam.removed=0;self.pending=clam;self.lastOpenError=nil
     if ItemLocation and C_Item and C_Item.GetItemGUID then
         clam.guid=C_Item.GetItemGUID(ItemLocation:CreateFromBagAndSlot(clam.bag,clam.slot))
     end
-    self:Status("Opening "..self.clams[current.itemID].."...")
+    self:Status("Opening "..name.."...")
     self:Schedule(.5)
     return true
 end
@@ -91,8 +109,18 @@ function C:LootOwnClam()
 end
 function C:Step()
     if not self.db or not self.db.enabled then return end
-    if self:Busy(true) then return end
     local p=self.pending
+    local reason=self:BusyReason(true)
+    if reason then
+        -- Keep the watchdog alive while casting/cursor/trading temporarily
+        -- blocks progress. Previously this return stranded pending forever.
+        if p and now()-p.started>8 then
+            self.manualOpen=true;self:Pause("Opening timed out. "..reason)
+        else self:Status("Waiting: "..reason) end
+        local _,total=self:FindClam(true)
+        if self.pending or total>0 then self:Schedule(.5) end
+        return
+    end
     if p then
         if p.waitSpace then
             if self:FreeSlots()>0 then p.waitSpace=nil;p.started=now()
@@ -128,18 +156,27 @@ function C:Step()
         end
         if p.ownsLoot then self:LootOwnClam() end
         if self.pending and now()-p.started>8 then
-            self.manualOpen=true;self:Pause("Opening paused. Click Open clam or Retry when ready.")
+            self.manualOpen=true;self:Pause(self.lastOpenError and ("Opening paused: "..self.lastOpenError) or "Opening paused. Click Open clam or Retry when ready.")
         elseif self.pending then self:Schedule(.5) end
         return
     end
     local clam,total=self:FindClam()
-    if not clam then if total==0 then self:Status("No clams in your bags.") end;return end
+    if not clam then
+        if total==0 then self:Status("No clams in your bags.")
+        elseif self:FindClam(true) then
+            self.manualOpen=true;self:Status("Clams ready. Click Open clam or Retry.",true)
+        else self:Status("Waiting: clam items are locked.");self:Schedule(.5) end
+        return
+    end
     if self.manualOpen then self:Status("Clams ready. Click Open clam to continue.",true);return end
     self:Open(clam)
 end
 function C:Retry()
     if self.lootOpen then self:Status("Close the loot window, then Retry.",true);return end
     self.failed={};self.pending=nil
+    -- An explicit retry permits one fresh attempt after a transient timeout.
+    -- A genuine client block still returns to manual mode without an auto-retry loop.
+    self.manualOpen=nil
     self:Status("Ready");self:Schedule()
 end
 function C:Init()
@@ -166,7 +203,11 @@ function C:Event(event,a,b)
         end
         return
     end
-    if event=="PLAYER_REGEN_DISABLED" or event=="PLAYER_LEAVING_WORLD" then self:RestoreLootWindow();self.pending=nil;return end
+    if event=="PLAYER_REGEN_DISABLED" or event=="PLAYER_LEAVING_WORLD" then
+        self:RestoreLootWindow();self.pending=nil
+        if event=="PLAYER_LEAVING_WORLD" then self.lootOpen=false;self.interactions={} end
+        return
+    end
     if event=="LOOT_OPENED" then
         self.lootOpen=true
         local p=self.pending
@@ -197,16 +238,22 @@ function C:Event(event,a,b)
     end
     if event=="UI_ERROR_MESSAGE" then
         local message=b or a
+        -- Diagnostic only: an unrelated spell error is not proof that our use
+        -- failed, and never grants ownership of loot or permission to delete.
+        if self.pending and not self.pending.ownsLoot and now()-self.pending.started<=8 and type(message)=="string" then self.lastOpenError=message end
         if self.pending and (self.pending.ownsLoot or self.opening) and self.db.enabled and now()-self.pending.started<=8 and message==ERR_INV_FULL and not self:Busy(true) then
             self.pending.full=true;self:RestoreLootWindow();self:Schedule(.3)
         end
         return
     end
-    if event=="GET_ITEM_INFO_RECEIVED" and not b then return end
+    if event=="GET_ITEM_INFO_RECEIVED" or event=="ITEM_DATA_LOAD_RESULT" then
+        self.requestedItemData[a]=nil
+        if not b then return end
+    end
     self:Schedule()
 end
 C.events=CreateFrame("Frame")
-for _,event in ipairs({"PLAYER_LOGIN","PLAYER_ENTERING_WORLD","PLAYER_LEAVING_WORLD","BAG_UPDATE_DELAYED","ITEM_UNLOCKED","GET_ITEM_INFO_RECEIVED","PLAYER_REGEN_ENABLED","PLAYER_REGEN_DISABLED","UNIT_SPELLCAST_STOP","UNIT_SPELLCAST_CHANNEL_STOP","CURSOR_CHANGED","LOOT_OPENED","LOOT_CLOSED","LOOT_SLOT_CLEARED","LOOT_BIND_CONFIRM","UI_ERROR_MESSAGE","ADDON_ACTION_BLOCKED","ADDON_ACTION_FORBIDDEN"}) do pcall(C.events.RegisterEvent,C.events,event) end
+for _,event in ipairs({"PLAYER_LOGIN","PLAYER_ENTERING_WORLD","PLAYER_LEAVING_WORLD","BAG_UPDATE_DELAYED","ITEM_UNLOCKED","GET_ITEM_INFO_RECEIVED","ITEM_DATA_LOAD_RESULT","PLAYER_REGEN_ENABLED","PLAYER_REGEN_DISABLED","UNIT_SPELLCAST_STOP","UNIT_SPELLCAST_CHANNEL_STOP","CURSOR_CHANGED","LOOT_OPENED","LOOT_CLOSED","LOOT_SLOT_CLEARED","LOOT_BIND_CONFIRM","UI_ERROR_MESSAGE","ADDON_ACTION_BLOCKED","ADDON_ACTION_FORBIDDEN"}) do pcall(C.events.RegisterEvent,C.events,event) end
 for event in pairs(opens) do pcall(C.events.RegisterEvent,C.events,event) end
 for event in pairs(closes) do pcall(C.events.RegisterEvent,C.events,event) end
 C.events:SetScript("OnEvent",function(_,...) C:Event(...) end)

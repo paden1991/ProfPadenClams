@@ -44,9 +44,10 @@ function C:CreateUI()
         if down or InCombatLockdown() then return end
         b:SetAttribute("type",nil)
         local clam=C:FindClam(true)
+        C.manualClick=true
         if C.db.enabled and clam and C:Begin(clam) then b:SetAttribute("type","item");b:SetAttribute("item",clam.bag.." "..clam.slot) end
     end)
-    f.open:SetScript("PostClick",function(_,_,down) if not down then C:Schedule(.3) end end)
+    f.open:SetScript("PostClick",function(_,_,down) if not down then C.manualClick=nil;C:RefreshUI();C:Schedule(.3) end end)
     f.pick=button(nil,"Pick up junk",145,-298,124)
     f.pick:SetScript("OnClick",function()
         if C:Busy(false) then C:Status("Close loot or trading windows and leave combat first.");return end
@@ -70,12 +71,15 @@ function C:RefreshUI(attention)
     local f=self.panel;if not f then return end
     local clam,total=self:FindClam(true);local junk=self:FindJunk()
     f.summary:SetText(total.." clam(s)  |  "..self:FreeSlots().." free general bag slots")
-    f.status:SetText(self.status or "Ready")
+    local reason=self:BusyReason(false)
+    f.status:SetText(not self.db.enabled and "Auto-open is off. Turn it on to continue." or reason and ("Waiting: "..reason) or total>0 and not clam and "Waiting: clam items are locked." or self.status or "Ready")
     f.auto:SetText(self.db.enabled and "Auto-open: On" or "Auto-open: Off")
     f.quick:SetText(self.db.quickLoot and "Silent quick loot: On" or "Silent quick loot: Off")
     f.cleanup:SetText(self.db.cleanup and "Junk cleanup: On" or "Junk cleanup: Off")
     f.junk:SetText(junk and ("Cheapest junk: "..(junk.name or ("Item "..junk.item.itemID)).." x"..junk.item.stackCount.." - "..self:Money(junk.value)) or "No disposable gray junk. Useful items are protected.")
-    f.open:SetEnabled(clam~=nil and self.db.enabled and not self.pending and not self:Busy(false))
+    -- Begin refreshes the UI from PreClick. Do not disable this same button
+    -- before its native secure item handler has received the click.
+    if not self.manualClick then f.open:SetEnabled(clam~=nil and self.db.enabled and not self.pending and not reason) end
     f.pick:SetEnabled(junk~=nil and not self:Busy(false))
     if attention then f:Show() end
 end
@@ -86,6 +90,7 @@ SlashCmdList.PROFPADENCLAMS=function(msg)
     if command=="on" or command=="off" then C:SetEnabled(command=="on");C:Print("Auto-open "..command..".")
     elseif command=="quickloot" and (arg=="on" or arg=="off") then C:SetQuickLoot(arg=="on");C:Print("Silent quick loot "..arg..".")
     elseif command=="retry" then C:Retry()
+    elseif command=="status" then C:Diagnostics()
     elseif command=="cleanup" and (arg=="on" or arg=="off") then C.db.cleanup=arg=="on";C:Retry();C:Print("Junk cleanup "..arg..".")
     elseif command=="keep" or command=="unkeep" then
         local id=tonumber(arg:match("item:(%d+)")) or tonumber(arg)

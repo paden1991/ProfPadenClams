@@ -2,11 +2,19 @@
 
 Optional clam opening and narrowly scoped inventory cleanup for ProfPaden.
 
-**WoW Forever · Interface 16001 · 0.1.1-beta**
+**WoW Forever · Interface 16001 · 0.1.3-beta**
 
 Release candidate / beta. Live-game acceptance is still required.
 
 Requires [ProfPaden](https://github.com/paden1991/ProfPaden), installed as a separate addon.
+
+## Opening repairs
+
+This update recognizes loot containers with "clam" in the name, fixes stale-loot and stalled-opening states that could disable **Open clam**, and preserves the native manual click handler. The panel now explains temporary waits. Use `/ppclams status` to report the exact blocker and last opening error. Existing inventory protections and silent quick loot remain in place.
+
+66 automated Lua checks passed, with additional UIForever panel checks. Live item opening remains unconfirmed. See [validation details](docs/OPENING-REPAIR.md).
+
+![Clam Keeper verification in UIForever](docs/simulator-checks.png)
 
 ## WowUp installation and publishing
 
